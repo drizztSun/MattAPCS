@@ -3,8 +3,7 @@ import java.util.ArrayList;
 public class Piece {
 	private char type;
 	private Boolean color;//true => black
-	private Boolean special;//to determine if piece is pawn or not(it has some unique properties with it)
-	private Boolean hasmoved;//important to determine castle+double move pawn
+	private Boolean hasntmoved;//important to determine castle+double move pawn
 	private String moveset;//where it can move(and therefore capture(note that pawns are a outlier from this rule))
 	
 	
@@ -40,16 +39,17 @@ public class Piece {
 	Piece(char t, Boolean c){
 		type = t;
 		color = c;
-		hasmoved = true;
-		if(type == 'P') {
-			special = true;
-		}
+		hasntmoved = true;
 		getmoveset();
 	}
 	
 	
-	public Boolean hasmoved() {
-		return hasmoved;
+	public Boolean hasntmoved() {
+		return hasntmoved;
+	}
+	
+	public void move() {
+		hasntmoved = false;
 	}
 	
 	public Boolean color() {
@@ -58,10 +58,6 @@ public class Piece {
 	
 	public char type() {
 		return type;
-	}
-	
-	public Boolean special() {
-		return special;
 	}
 	
 	public String moveset() {

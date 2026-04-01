@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 public class Chess {
 	
+	Scanner s = new Scanner(System.in);
 	private Piece[][] board = new Piece[8][8];
 	private Boolean[][] threat = new Boolean[8][8];
 	private int[] dir = {-1, 0, 1, 0, -1};
@@ -24,6 +25,20 @@ public class Chess {
 	
 	Chess() {
 		setup();
+	}
+	
+	public void testsmth() {
+	    for(int i = 0; i < 8; i++)
+	        for(int j = 0; j < 8; j++)
+	            board[i][j] = null;
+
+	    board[7][4] = new Piece('K', false);
+	    board[7][7] = new Piece('R', false);
+
+	    board[1][2] = new Piece('P', false);
+
+	    board[0][4] = new Piece('K', true);
+
 	}
 	
 	public void test() {
@@ -118,7 +133,7 @@ public class Chess {
 						if(newi == i+1 && newj == j) {
 							return 1;
 						}
-						else if(p.hasmoved() && (newj == j && (newi == i+2 || newi == i+1))){
+						else if(p.hasntmoved() && (newj == j && (newi == i+2 || newi == i+1))){
 								return 1;
 						}else {
 							return 0;
@@ -127,7 +142,7 @@ public class Chess {
 						if(newi == i-1 && newj == j) {
 							return 1;
 						}
-						else if(p.hasmoved() && (newj == j && (newi == i-2 || newi == i-1))){
+						else if(p.hasntmoved() && (newj == j && (newi == i-2 || newi == i-1))){
 								return 1;
 						}else {
 							return 0;
@@ -159,7 +174,7 @@ public class Chess {
 				}
 				return found;
 			}else if(c == 'D') {
-				for(int d = 0; d<3; d++) {
+				for(int d = 0; d<4; d++) {
 					for(int b = 1; b<=8; b++) {
 						int ni = i+b*dirdiag[d], nj = j+b*dirdiag[d+1];
 						if(nj >= 8 || ni >= 8 || nj < 0 || ni < 0) {
@@ -175,7 +190,7 @@ public class Chess {
 				}
 				
 			}else if(c== 'S') {
-				for(int b = 0; b<3; b++) {
+				for(int b = 0; b<4; b++) {
 					for(int d = 1; d<=8; d++) {
 						int ni = i+d*dir[b], nj = j+d*dir[b+1];
 						if(nj >= 8 || ni >= 8 || nj < 0 || ni < 0)break;
@@ -211,10 +226,12 @@ public class Chess {
 		if(p == 1) {
 			board[newi][newj] = board[i][j];
 			board[i][j] = null;
+			board[newi][newj].move();
 			return 1;
 		}else{
 			return p;
 		}
+		
 	}
 	
 	public int move(int i, int j, int newi, int newj) {
@@ -223,10 +240,13 @@ public class Chess {
 		if(p == 1) {
 			board[newi][newj] = board[i][j];
 			board[i][j] = null;
+			board[newi][newj].move();
 			return 1;
 		}else{
 			return p;
 		}
+		
+
 	}
 	
 	public int[] findKing(Boolean side) {
@@ -246,23 +266,29 @@ public class Chess {
 	public int startCastle(Boolean side, Boolean longcastle) {//ret:0 = occupied, 1 = successful castle
 		int row = side ? 0 : 7; // black = 0, white = 7
 
-		if(board[row][4] == null || !board[row][4].hasmoved()) return 0;
+		if(board[row][4] == null || !board[row][4].hasntmoved()) return 0;
 
 		if(longcastle) { //castle queenside
-			if(board[row][0] == null || !board[row][0].hasmoved()) return 0;
+			if(board[row][0] == null || !board[row][0].hasntmoved()) return 0;
 			if(board[row][1] != null || board[row][2] != null || board[row][3] != null) return 0;
 			board[row][2] = board[row][4]; 
 			board[row][3] = board[row][0]; 
+			board[row][2].move();
+			board[row][3].move();
 			board[row][4] = null;
 			board[row][0] = null;
 		} else { //castle kingside
-			if(board[row][7] == null || !board[row][7].hasmoved()) return 0;
+			if(board[row][7] == null || !board[row][7].hasntmoved()) return 0;
 			if(board[row][5] != null || board[row][6] != null) return 0;
 			board[row][6] = board[row][4]; 
 			board[row][5] = board[row][7]; 
+			board[row][6].move();
+			board[row][5].move();
 			board[row][4] = null;
 			board[row][7] = null;
 		}
+		
+		
 		return 1;
 	}
 	
@@ -284,11 +310,37 @@ public class Chess {
 		
 	}
 	
+	public void promote() {//promote the pawn on the end of the lines(all of them)
+		
+		for (int i = 0; i < 8; i++) {
+	        if (board[0][i] != null && board[0][i].type() == 'P' && !board[0][i].color()) {
+	            System.out.println("Choose a piece to promote to (Q, R, B, N):");
+	            String choice = s.nextLine().toUpperCase();
+	            while (!choice.equals("Q") && !choice.equals("R") && !choice.equals("B") && !choice.equals("N")) {
+	                System.out.println("That's not a valid choice");
+	                choice = s.nextLine().toUpperCase();
+	            }
+	            board[0][i] = new Piece(choice.charAt(0), false);
+	        }
+
+	        
+	        if (board[7][i] != null && board[7][i].type() == 'P' && board[7][i].color()) {
+	            System.out.println("Choose a piece to promote to (Q, R, B, N):");
+	            String choice = s.nextLine().toUpperCase();
+	            while (!choice.equals("Q") && !choice.equals("R") && !choice.equals("B") && !choice.equals("N")) {
+	                System.out.println("That's not a valid choice");
+	                choice = s.nextLine().toUpperCase();
+	            }
+	            board[7][i] = new Piece(choice.charAt(0), true);
+	        }
+	    }
+	}
+	
 	public Boolean inCheckmate(Boolean side) {
 		int[] coords = findKing(side);
 		int x = coords[0], y = coords[1];
 
-		if(!isThreatened(x, y, side)) return false; //i dont think thjis will ever happen
+		if(!isThreatened(x, y, side)) return false; 
 
 		// first check if all 9 squares are threatened
 		for(int i = 0; i < 8; i++) {
@@ -302,7 +354,7 @@ public class Chess {
 			boolean stillThreatened = isThreatened(newx, newy, side);
 			board[x][y] = board[newx][newy];
 			board[newx][newy] = saved;
-			//look at what i told you
+			//see
 			if(!stillThreatened) return false; // king can escape
 		}
 
@@ -337,6 +389,7 @@ public class Chess {
 		Piece newbuff = board[newx][newy];
 		Boolean res = false;
 		board[newx][newy] = buff;
+		board[x][y] = null;
 		
 		int[] kpos = findKing(side);
 		
@@ -373,7 +426,7 @@ public class Chess {
 	}
 	
 	public void startGame() {
-		Scanner s = new Scanner(System.in);
+		
 		Boolean ended = false;
 		Boolean turn = false;
 		int moves = 0;
@@ -460,7 +513,7 @@ public class Chess {
 				else if(move.equals("0-0-0"))castle = 1;
 				
 				newx = coords[2]; newy = coords[3];
-				if(x == -1) {
+				if(newx == -1) {
 					newx = 0; newy = 0;
 					misinput = true;
 				}
@@ -490,6 +543,7 @@ public class Chess {
 			}
 			
 			
+			
 			if(castle == 0) {
 				if(capature) {
 					take(x, y, newx, newy);
@@ -499,6 +553,8 @@ public class Chess {
 			}
 			
 			
+			
+			promote();
 			
 			turn = !turn;
 			if(inCheckmate(turn)) {
